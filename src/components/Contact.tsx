@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { personalInfo } from "../data";
 import { Mail, Phone, MapPin, Send, CheckCircle2, RefreshCw, Linkedin, Github, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
+import { collection, doc, setDoc } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "../firebase";
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -17,7 +19,7 @@ export default function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       alert("Please enter Name, Email, and Message before submitting.");
@@ -26,18 +28,39 @@ export default function Contact() {
 
     setStatus('submitting');
 
-    // Simulate reliable slow network save (1.2 seconds)
-    setTimeout(() => {
+    try {
+      const messagesCol = collection(db, "messages");
+      const newDocRef = doc(messagesCol); // Auto-generate safe Firestore document reference
+      
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+        timestamp: new Date().toISOString(),
+      };
+
+      // Handle standard and optional fields correctly as specified in firebase-blueprint schema
+      if (!payload.subject) {
+        delete (payload as any).subject;
+      }
+
+      await setDoc(newDocRef, payload);
+
       // Save query locally to client storage to show off database persistence-mimic
       const previousMessages = JSON.parse(localStorage.getItem("portfolio_queries") || "[]");
-      previousMessages.push({ ...form, timestamp: new Date().toISOString() });
+      previousMessages.push(payload);
       localStorage.setItem("portfolio_queries", JSON.stringify(previousMessages));
 
       setStatus('success');
       // Reset form variables
       setForm({ name: "", email: "", subject: "", message: "" });
-    }, 1200);
+    } catch (error) {
+      setStatus('idle');
+      handleFirestoreError(error, OperationType.CREATE, "messages");
+    }
   };
+
 
   return (
     <section

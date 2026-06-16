@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   personalInfo,
   educationList,
@@ -8,11 +8,55 @@ import {
   internshipsList,
   achievementsList,
 } from "../data";
-import { Download, Mail, MapPin, Phone, Github, Linkedin, ExternalLink, Award, Sparkles } from "lucide-react";
+import { Download, Mail, MapPin, Phone, Github, Linkedin, ExternalLink, Award, Sparkles, RefreshCw } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function ResumeSection() {
-  const handlePrint = () => {
-    window.print();
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById("resume-cv-paper");
+    if (!element) return;
+
+    try {
+      setIsDownloading(true);
+
+      const opt = {
+        scale: 2, // High resolution scale
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        windowWidth: 1024, // Stabilize viewport styling for pristine element capture
+      };
+
+      // Perform html2canvas capture
+      const canvas = await html2canvas(element, opt);
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210; // A4 width
+      const pageHeight = 297; // A4 height
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("Susmitha_Karaka_Resume.pdf");
+    } catch (error) {
+      console.error("Error generating or saving PDF resume:", error);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -41,23 +85,34 @@ export default function ResumeSection() {
               Synchronized in real-time with website profiles, designed for perfect paper printing and parser compliance.
             </p>
           </div>
-          <div className="flex flex-col items-center sm:items-end gap-1.5 shrink-0">
+          <div className="shrink-0">
             <button
-              onClick={handlePrint}
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
               aria-label="Download high-fidelity vector PDF resume"
-              className="px-5 py-3 bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold rounded-xl cursor-pointer flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 duration-150"
+              className="px-5 py-3 bg-brand-blue hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-bold rounded-xl cursor-pointer flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 duration-150"
             >
-              <Download size={14} className="animate-bounce" style={{ animationDuration: '2s' }} />
-              Download Resume (PDF)
+              {isDownloading ? (
+                <>
+                  <RefreshCw size={14} className="animate-spin" />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download size={14} className="animate-bounce" style={{ animationDuration: "2s" }} />
+                  Download Resume (PDF)
+                </>
+              )}
             </button>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono text-center sm:text-right">
-              Tip: Choose <strong className="text-slate-500 dark:text-slate-400">"Save as PDF"</strong> in destination prompt
-            </p>
           </div>
         </div>
 
         {/* CV Paper Plate container (Prints seamlessly on A4) */}
-        <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 sm:p-12 rounded-3xl shadow-md print:shadow-none print:border-none print:bg-white print:p-0 transition-all relative overflow-hidden">
+        <div
+          id="resume-cv-paper"
+          className="max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 sm:p-12 rounded-3xl shadow-md print:shadow-none print:border-none print:bg-white print:p-0 transition-all relative overflow-hidden"
+        >
+
           
           {/* Header Block decoration for screen (hidden in print) */}
           <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-teal-500 print:hidden" />
