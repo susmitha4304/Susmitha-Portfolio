@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-brand-blue: #2563EB;
+  --color-brand-teal: #14B8A6;
+  --color-brand-slate: #1E293B;
+  --color-brand-bg: #F8FAFC;
+  --color-brand-border: #E2E8F0;
+  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-glow: glow 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.3; filter: blur(40px); }
+  50% { opacity: 0.6; filter: blur(60px); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #030712;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #1E293B;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-brand-slate);
+  background-color: var(--color-brand-bg);
+}
+
+.dark body {
+  color: #F8FAFC;
+  background-color: #030712;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media print {
+  /* Hide all non-resume sections and layouts */
+  header, nav, #hero, #about, #education, #skills, #projects, #certifications, #social, #contact, footer, .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Reset background and text details for high-fidelity black-and-white printing */
+  html, body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  #resume-section {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    border: none !important;
+  }
+  
+  #resume-section .max-w-4xl {
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+  }
+
+  /* Force light theme elements to print beautifully with accurate contrasts */
+  .text-slate-900, .text-slate-800 {
+    color: #000000 !important;
+  }
+
+  .text-slate-705, .text-slate-700, .text-slate-650, .text-slate-600, .text-slate-500, .text-slate-550, .text-slate-355 {
+    color: #333333 !important;
+  }
+
+  .text-brand-blue, .text-brand-teal {
+    color: #1e3a8a !important; /* Deep Navy Blue for professional high contrast */
+  }
+
+  /* Ensure standard details express */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
